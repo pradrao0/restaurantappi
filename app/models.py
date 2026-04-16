@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 # 🟢 Restaurant
 class Restaurant(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="restaurants")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.name
@@ -23,7 +24,7 @@ class MenuItem(models.Model):
     name = models.CharField(max_length=100)
     price = models.PositiveIntegerField()
     is_available = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.name} - {self.restaurant.name}"
