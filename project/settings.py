@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,11 +8,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -------------------------
 # SECURITY
 # -------------------------
-SECRET_KEY = 'django-insecure-me11*!f6n3nrup!_56$s$vtw3_lb$*i2ao5y!p+le1^tm_pon$'
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-change-this-in-production"
+)
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".onrender.com"
+]
 
 
 # -------------------------
@@ -28,18 +36,19 @@ INSTALLED_APPS = [
     # local app
     'app',
 
-    # REST framework
+    # DRF
     'rest_framework',
     'rest_framework.authtoken',
 
-    # JWT + authentication
+    # auth
     'djoser',
+    'rest_framework_simplejwt',
 
-    # Swagger
-    'drf_yasg',
-
-    # filtering
+    # filters
     'django_filters',
+
+    # swagger
+    'drf_yasg',
 ]
 
 
@@ -48,6 +57,10 @@ INSTALLED_APPS = [
 # -------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+
+    # whitenoise (STATIC FILES FOR RENDER)
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,7 +96,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 
 # -------------------------
-# DATABASE
+# DATABASE (SQLite for now)
 # -------------------------
 DATABASES = {
     'default': {
@@ -114,26 +127,25 @@ USE_TZ = True
 
 
 # -------------------------
-# STATIC FILES
+# STATIC FILES (RENDER FIX)
 # -------------------------
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# whitenoise compression
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # -------------------------
-# DJANGO REST FRAMEWORK
+# DRF CONFIG
 # -------------------------
 REST_FRAMEWORK = {
-    # JWT authentication
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-
-    # Global permission (secure by default)
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-
-    # Global filtering support
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
@@ -141,7 +153,7 @@ REST_FRAMEWORK = {
 
 
 # -------------------------
-# SIMPLE JWT CONFIG
+# SIMPLE JWT
 # -------------------------
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
@@ -150,10 +162,10 @@ SIMPLE_JWT = {
 
 
 # -------------------------
-# DJOSER CONFIG
+# DJOSER
 # -------------------------
 DJOSER = {
     'LOGIN_FIELD': 'username',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'SERIALIZERS': {},
 }
+
